@@ -32,7 +32,7 @@ export function InputPanel({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>风格预设</Label>
-          <Select value={style} onValueChange={(v) => onStyleChange(v as InputPanelProps["style"])}>
+          <Select value={style} onValueChange={(v) => onStyleChange(v as "academic" | "exam" | "casual" | "meeting")}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {STYLE_OPTIONS.map((s) => (
@@ -45,7 +45,7 @@ export function InputPanel({
         </div>
         <div className="space-y-2">
           <Label>详细度</Label>
-          <Select value={depth} onValueChange={(v) => onDepthChange(v as InputPanelProps["depth"])}>
+          <Select value={depth} onValueChange={(v) => onDepthChange(v as "minimal" | "standard" | "detailed")}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {DEPTH_OPTIONS.map((d) => (
