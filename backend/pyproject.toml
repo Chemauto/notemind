@@ -11,6 +11,7 @@ dependencies = [
     "zhipuai>=2.1.0",
     "python-dotenv>=1.0.0",
     "httpx>=0.27.0",
+    "sniffio>=1.3.0",
 ]
 
 [project.optional-dependencies]
