@@ -1,10 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Routes, Route } from "react-router-dom";
+import { InputPage } from "@/pages/InputPage";
 
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Button>NoteMind</Button>
-    </div>
+    <Routes>
+      <Route path="/" element={<InputPage />} />
+    </Routes>
   );
 }
 
