@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { DualPane } from "@/components/DualPane";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
+import { ExportMindmapButton } from "@/components/ExportMindmapButton";
 import { MindmapView } from "@/components/MindmapView";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -16,6 +17,7 @@ export function NotePage() {
   const [editing, setEditing] = useState(true);
   const [scrollToLine, setScrollToLine] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mindmapSvgRef = useRef<SVGSVGElement>(null);
 
   const debouncedMarkdown = useDebouncedValue(markdown, 300);
   const headers = useMemo(() => parseHeaders(markdown), [markdown]);
@@ -74,6 +76,7 @@ export function NotePage() {
           <Button variant="outline" onClick={handle_download_md}>
             下载 .md
           </Button>
+          <ExportMindmapButton svgRef={mindmapSvgRef} />
           <Button onClick={handle_new}>新建</Button>
         </div>
       </div>
@@ -89,7 +92,7 @@ export function NotePage() {
             <MarkdownPreview markdown={markdown} />
           )
         }
-        right={<MindmapView markdown={debouncedMarkdown} onNodeClick={handle_node_click} />}
+        right={<MindmapView ref={mindmapSvgRef} markdown={debouncedMarkdown} onNodeClick={handle_node_click} />}
       />
       <p className="text-xs text-zinc-500 mt-2">
         编辑左侧 → 右侧导图自动更新（300ms 防抖）· 点击导图节点 → 左侧滚动到对应标题
