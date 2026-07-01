@@ -2,7 +2,11 @@ from pydantic import BaseModel, Field
 
 
 class OutlineRequest(BaseModel):
-    text: str = Field(..., min_length=1)
+    text: str = Field(default="", description="原始文字材料，可空")
+    images: list[str] = Field(
+        default_factory=list,
+        description="图片 data URL 列表（data:image/...;base64,...）",
+    )
 
 
 class GenerateMarkdownRequest(BaseModel):
