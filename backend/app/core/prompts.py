@@ -33,6 +33,14 @@ OUTLINE_USER_TEMPLATE = """材料：
 {text}
 """
 
+OUTLINE_USER_WITH_IMAGES_TEMPLATE = """材料：
+
+文字部分：
+{text}
+
+另附 {n} 张图片，请结合图片内容理解材料（如截图、信息图、手写笔记、白板照等）。图片按上传顺序排列。若图片中有要点未被文字覆盖，请纳入大纲；若图片与文字冲突，以文字为准并在 summary 注明。
+"""
+
 
 MARKDOWN_SYSTEM = """你是笔记撰写专家。根据大纲 JSON 和指定风格生成 Markdown 笔记。"""
 
