@@ -10,7 +10,7 @@ import type { SavedNote } from "@/lib/types";
 export function NotesListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setOutline, setMarkdown, setInputText, setStyle, setDepth } =
+  const { setOutline, setMarkdown, setInputText, setStyle, setDepth, setNoteId } =
     useNoteStore();
 
   const query = useQuery({
@@ -31,6 +31,7 @@ export function NotesListPage() {
     setInputText(note.inputText);
     setStyle(note.style);
     setDepth(note.depth);
+    setNoteId(note.id);
     navigate("/note");
   };
 

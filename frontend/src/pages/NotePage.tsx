@@ -21,9 +21,8 @@ import { useNoteStore } from "@/stores/noteStore";
 
 export function NotePage() {
   const navigate = useNavigate();
-  const { markdown, outline, style, depth, inputText, setMarkdown, reset } = useNoteStore();
+  const { markdown, outline, style, depth, inputText, noteId, setMarkdown, setNoteId, reset } = useNoteStore();
   const [editing, setEditing] = useState(true);
-  const [noteId, setNoteId] = useState<string | null>(null);
   const [scrollToLine, setScrollToLine] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mindmapSvgRef = useRef<SVGSVGElement>(null);

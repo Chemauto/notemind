@@ -9,6 +9,7 @@ interface NoteState {
   markdown: string;
   style: Style;
   depth: Depth;
+  noteId: string | null;
   setInputText: (text: string) => void;
   addImages: (newImages: StoredImage[]) => void;
   removeImage: (id: string) => void;
@@ -16,6 +17,7 @@ interface NoteState {
   setMarkdown: (markdown: string) => void;
   setStyle: (style: Style) => void;
   setDepth: (depth: Depth) => void;
+  setNoteId: (id: string | null) => void;
   reset: () => void;
 }
 
@@ -26,6 +28,7 @@ export const useNoteStore = create<NoteState>((set) => ({
   markdown: "",
   style: "academic",
   depth: "standard",
+  noteId: null,
   setInputText: (inputText) => set({ inputText }),
   addImages: (newImages) =>
     set((state) => ({ images: [...state.images, ...newImages] })),
@@ -35,5 +38,6 @@ export const useNoteStore = create<NoteState>((set) => ({
   setMarkdown: (markdown) => set({ markdown }),
   setStyle: (style) => set({ style }),
   setDepth: (depth) => set({ depth }),
-  reset: () => set({ inputText: "", images: [], outline: null, markdown: "" }),
+  setNoteId: (noteId) => set({ noteId }),
+  reset: () => set({ inputText: "", images: [], outline: null, markdown: "", noteId: null }),
 }));
