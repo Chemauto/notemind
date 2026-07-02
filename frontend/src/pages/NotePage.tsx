@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { Save, FileJson } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DualPane } from "@/components/DualPane";
@@ -8,17 +9,21 @@ import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
 import { ExportMindmapButton } from "@/components/ExportMindmapButton";
 import { MindmapView } from "@/components/MindmapView";
+import { SaveNoteDialog } from "@/components/SaveNoteDialog";
 import { StyleDepthSelector } from "@/components/StyleDepthSelector";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { generate_markdown } from "@/lib/api";
+import { generate_id, save_note } from "@/lib/notes_db";
 import { findHeaderLine, parseHeaders } from "@/lib/outline_parser";
+import type { SavedNote } from "@/lib/types";
 import { useNoteStore } from "@/stores/noteStore";
 
 export function NotePage() {
   const navigate = useNavigate();
-  const { markdown, outline, style, depth, setMarkdown, reset } = useNoteStore();
+  const { markdown, outline, style, depth, inputText, setMarkdown, reset } = useNoteStore();
   const [editing, setEditing] = useState(true);
+  const [noteId, setNoteId] = useState<string | null>(null);
   const [scrollToLine, setScrollToLine] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mindmapSvgRef = useRef<SVGSVGElement>(null);
@@ -79,6 +84,44 @@ export function NotePage() {
     navigate("/");
   };
 
+  const handle_save = async (title: string) => {
+    const now = Date.now();
+    const id = noteId ?? (await generate_id());
+    const record: SavedNote = {
+      id,
+      title,
+      markdown,
+      outline,
+      style,
+      depth,
+      inputText,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await save_note(record);
+    setNoteId(id);
+  };
+
+  const handle_export_json = () => {
+    const payload = {
+      title: outline?.title ?? "note",
+      markdown,
+      outline,
+      style,
+      depth,
+      inputText,
+      exportedAt: new Date().toISOString(),
+      appVersion: "0.1.0",
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${payload.title}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
@@ -103,8 +146,25 @@ export function NotePage() {
           <Button variant="outline" onClick={handle_download_md}>
             下载 .md
           </Button>
+          <SaveNoteDialog
+            trigger={
+              <Button variant="outline">
+                <Save size={14} className="mr-1" />
+                保存
+              </Button>
+            }
+            defaultTitle={outline?.title ?? "未命名笔记"}
+            onSave={handle_save}
+          />
+          <Button variant="outline" onClick={handle_export_json}>
+            <FileJson size={14} className="mr-1" />
+            导出 .json
+          </Button>
           <ExportMindmapButton svgRef={mindmapSvgRef} />
           <Button onClick={handle_new}>新建</Button>
+          <Button variant="outline" onClick={() => navigate("/notes")}>
+            我的笔记
+          </Button>
         </div>
       </div>
       {regenerate_mutation.isError && (
