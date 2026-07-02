@@ -1,6 +1,7 @@
 import { ImageDropzone, type StoredImage } from "@/components/ImageDropzone";
 import { PdfUpload } from "@/components/PdfUpload";
 import { WebFetch } from "@/components/WebFetch";
+import { AudioUpload } from "@/components/AudioUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { DEPTH_OPTIONS, STYLE_OPTIONS } from "@/lib/types";
 import {
@@ -22,6 +23,7 @@ interface InputPanelProps {
   onRemoveImage: (id: string) => void;
   onPdfExtracted: (text: string, fileName: string) => void;
   onWebExtracted: (text: string, url: string) => void;
+  onAudioExtracted: (text: string, fileName: string) => void;
   onError: (message: string) => void;
   onStyleChange: (style: "academic" | "exam" | "casual" | "meeting") => void;
   onDepthChange: (depth: "minimal" | "standard" | "detailed") => void;
@@ -37,6 +39,7 @@ export function InputPanel({
   onRemoveImage,
   onPdfExtracted,
   onWebExtracted,
+  onAudioExtracted,
   onError,
   onStyleChange,
   onDepthChange,
@@ -44,7 +47,7 @@ export function InputPanel({
   return (
     <div className="w-full max-w-2xl space-y-4">
       <Textarea
-        placeholder="把要做成笔记的文字贴到这里，或上传 PDF / 抓取网页..."
+        placeholder="把要做成笔记的文字贴到这里，或上传 PDF / 网页 / 音频..."
         className="min-h-[200px]"
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
@@ -53,6 +56,8 @@ export function InputPanel({
         <PdfUpload onExtracted={onPdfExtracted} onError={onError} />
         <span className="text-xs text-zinc-400">或</span>
         <WebFetch onExtracted={onWebExtracted} onError={onError} />
+        <span className="text-xs text-zinc-400">或</span>
+        <AudioUpload onExtracted={onAudioExtracted} onError={onError} />
       </div>
       <ImageDropzone
         images={images}
