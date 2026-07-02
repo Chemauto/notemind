@@ -50,7 +50,7 @@ export const DEPTH_OPTIONS: { value: Depth; label: string }[] = [
 
 export interface PreprocessResult {
   text: string;
-  source_type: "pdf" | "web";
+  source_type: "pdf" | "web" | "audio";
   metadata: Record<string, unknown>;
 }
 
