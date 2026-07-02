@@ -1,23 +1,37 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { DualPane } from "@/components/DualPane";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
 import { ExportMindmapButton } from "@/components/ExportMindmapButton";
 import { MindmapView } from "@/components/MindmapView";
+import { StyleDepthSelector } from "@/components/StyleDepthSelector";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { generate_markdown } from "@/lib/api";
 import { findHeaderLine, parseHeaders } from "@/lib/outline_parser";
 import { useNoteStore } from "@/stores/noteStore";
 
 export function NotePage() {
   const navigate = useNavigate();
-  const { markdown, setMarkdown, reset } = useNoteStore();
+  const { markdown, outline, style, depth, setMarkdown, reset } = useNoteStore();
   const [editing, setEditing] = useState(true);
   const [scrollToLine, setScrollToLine] = useState<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mindmapSvgRef = useRef<SVGSVGElement>(null);
+
+  const regenerate_mutation = useMutation({
+    mutationFn: () => {
+      if (!outline) throw new Error("大纲丢失，无法重新生成");
+      return generate_markdown({ outline, style, depth });
+    },
+    onSuccess: (res) => {
+      setMarkdown(res.markdown);
+    },
+  });
 
   const debouncedMarkdown = useDebouncedValue(markdown, 300);
   const headers = useMemo(() => parseHeaders(markdown), [markdown]);
@@ -67,9 +81,22 @@ export function NotePage() {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <h1 className="text-2xl font-semibold">笔记</h1>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <StyleDepthSelector size="sm" />
+          <ConfirmDialog
+            title="重新生成笔记？"
+            description="将根据当前大纲和风格重新生成，会覆盖现有笔记（包括你的编辑）。"
+            confirmText="重新生成"
+            onConfirm={() => regenerate_mutation.mutate()}
+            disabled={!outline || regenerate_mutation.isPending}
+            trigger={
+              <Button variant="outline" disabled={!outline || regenerate_mutation.isPending}>
+                {regenerate_mutation.isPending ? "生成中..." : "重新生成"}
+              </Button>
+            }
+          />
           <Button variant="outline" onClick={() => setEditing(!editing)}>
             {editing ? "预览" : "编辑"}
           </Button>
@@ -80,6 +107,11 @@ export function NotePage() {
           <Button onClick={handle_new}>新建</Button>
         </div>
       </div>
+      {regenerate_mutation.isError && (
+        <p className="text-red-500 mb-4 text-sm">
+          重新生成失败：{(regenerate_mutation.error as Error).message}
+        </p>
+      )}
       <DualPane
         left={
           editing ? (
