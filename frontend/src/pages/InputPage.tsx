@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export function InputPage() {
     setDepth,
     setOutline,
   } = useNoteStore();
+  const [preprocessError, setPreprocessError] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -36,6 +38,18 @@ export function InputPage() {
 
   const hasInput = inputText.trim().length > 0 || images.length > 0;
 
+  const handle_pdf = (text: string, fileName: string) => {
+    const prefix = inputText.trim() ? `${inputText.trim()}\n\n` : "";
+    setInputText(`${prefix}# 来源：${fileName}\n\n${text}`);
+    setPreprocessError(null);
+  };
+
+  const handle_web = (text: string, url: string) => {
+    const prefix = inputText.trim() ? `${inputText.trim()}\n\n` : "";
+    setInputText(`${prefix}# 来源：${url}\n\n${text}`);
+    setPreprocessError(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <h1 className="text-4xl font-semibold text-brand-600 mb-2">NoteMind</h1>
@@ -48,6 +62,9 @@ export function InputPage() {
         onTextChange={setInputText}
         onAddImages={addImages}
         onRemoveImage={removeImage}
+        onPdfExtracted={handle_pdf}
+        onWebExtracted={handle_web}
+        onError={setPreprocessError}
         onStyleChange={setStyle}
         onDepthChange={setDepth}
       />
@@ -59,9 +76,12 @@ export function InputPage() {
       >
         {mutation.isPending ? "生成中..." : "开始生成"}
       </Button>
+      {preprocessError && (
+        <p className="text-red-500 mt-2 text-sm">预处理失败：{preprocessError}</p>
+      )}
       {mutation.isError && (
         <p className="text-red-500 mt-2 text-sm">
-          出错了：{(mutation.error as Error).message}
+          生成出错了：{(mutation.error as Error).message}
         </p>
       )}
     </div>

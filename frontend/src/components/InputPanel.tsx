@@ -1,4 +1,6 @@
 import { ImageDropzone, type StoredImage } from "@/components/ImageDropzone";
+import { PdfUpload } from "@/components/PdfUpload";
+import { WebFetch } from "@/components/WebFetch";
 import { Textarea } from "@/components/ui/textarea";
 import { DEPTH_OPTIONS, STYLE_OPTIONS } from "@/lib/types";
 import {
@@ -18,6 +20,9 @@ interface InputPanelProps {
   onTextChange: (text: string) => void;
   onAddImages: (newImages: StoredImage[]) => void;
   onRemoveImage: (id: string) => void;
+  onPdfExtracted: (text: string, fileName: string) => void;
+  onWebExtracted: (text: string, url: string) => void;
+  onError: (message: string) => void;
   onStyleChange: (style: "academic" | "exam" | "casual" | "meeting") => void;
   onDepthChange: (depth: "minimal" | "standard" | "detailed") => void;
 }
@@ -30,17 +35,25 @@ export function InputPanel({
   onTextChange,
   onAddImages,
   onRemoveImage,
+  onPdfExtracted,
+  onWebExtracted,
+  onError,
   onStyleChange,
   onDepthChange,
 }: InputPanelProps) {
   return (
     <div className="w-full max-w-2xl space-y-4">
       <Textarea
-        placeholder="把要做成笔记的文字贴到这里（或仅用图片）..."
+        placeholder="把要做成笔记的文字贴到这里，或上传 PDF / 抓取网页..."
         className="min-h-[200px]"
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
       />
+      <div className="flex flex-wrap items-center gap-2">
+        <PdfUpload onExtracted={onPdfExtracted} onError={onError} />
+        <span className="text-xs text-zinc-400">或</span>
+        <WebFetch onExtracted={onWebExtracted} onError={onError} />
+      </div>
       <ImageDropzone
         images={images}
         onAdd={onAddImages}
