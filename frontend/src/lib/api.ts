@@ -65,3 +65,14 @@ export async function preprocess_audio(file: File): Promise<PreprocessResult> {
   if (!response.ok) await handle_error(response);
   return response.json() as Promise<PreprocessResult>;
 }
+
+export async function preprocess_video(file: File): Promise<PreprocessResult> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch(`${API_BASE}/preprocess/video`, {
+    method: "POST",
+    body: form,
+  });
+  if (!response.ok) await handle_error(response);
+  return response.json() as Promise<PreprocessResult>;
+}
