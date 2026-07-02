@@ -47,3 +47,13 @@ export const DEPTH_OPTIONS: { value: Depth; label: string }[] = [
   { value: "standard", label: "标准" },
   { value: "detailed", label: "详细" },
 ];
+
+export interface PreprocessResult {
+  text: string;
+  source_type: "pdf" | "web";
+  metadata: Record<string, unknown>;
+}
+
+export interface WebFetchRequest {
+  url: string;
+}
