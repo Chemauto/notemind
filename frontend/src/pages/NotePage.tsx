@@ -81,6 +81,7 @@ export function NotePage() {
 
   const handle_new = () => {
     reset();
+    setNoteId(null);
     navigate("/");
   };
 
