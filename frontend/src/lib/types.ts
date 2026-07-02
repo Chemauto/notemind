@@ -57,3 +57,15 @@ export interface PreprocessResult {
 export interface WebFetchRequest {
   url: string;
 }
+
+export interface SavedNote {
+  id: string;
+  title: string;
+  markdown: string;
+  outline: Outline | null;
+  style: Style;
+  depth: Depth;
+  inputText: string;
+  createdAt: number;
+  updatedAt: number;
+}
