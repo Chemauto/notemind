@@ -135,6 +135,78 @@ def test_preprocess_audio_endpoint_rejects_missing_file(fake_env: dict[str, str]
     assert response.status_code == 422
 
 
+def _fake_extract_audio(raw: bytes):
+    result = MagicMock()
+    result.audio_bytes = b"wav-bytes"
+    result.metadata = {"duration_seconds": 30.0, "format": "wav", "size_bytes": 9}
+    return result
+
+
+def _fake_transcribe_default(raw: bytes, mime_type: str, language=None, model_name="small"):
+    result = MagicMock()
+    result.text = "视频转写文本"
+    result.metadata = {"language": "zh", "duration": 30.0, "model": "small"}
+    return result
+
+
+def test_preprocess_video_endpoint_returns_text(fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.main import app
+
+    monkeypatch.setattr("app.api.preprocess.extract_audio", _fake_extract_audio)
+    monkeypatch.setattr("app.api.preprocess.transcribe_audio", _fake_transcribe_default)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/preprocess/video",
+        files={"file": ("test.mp4", b"fake-video-bytes", "video/mp4")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["text"] == "视频转写文本"
+    assert body["source_type"] == "video"
+    assert body["metadata"]["language"] == "zh"
+    assert body["metadata"]["source_format"] == "video"
+    assert body["metadata"]["duration_seconds"] == 30.0
+
+
+def test_preprocess_video_endpoint_rejects_missing_file(fake_env: dict[str, str]) -> None:
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.post("/api/preprocess/video", files={})
+    assert response.status_code == 422
+
+
+def test_preprocess_video_endpoint_rejects_unsupported_mime(fake_env: dict[str, str]) -> None:
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/preprocess/video",
+        files={"file": ("t.txt", b"hello", "text/plain")},
+    )
+    assert response.status_code in (400, 422)
+
+
+def test_preprocess_video_endpoint_returns_500_on_extract_error(
+    fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.preprocess import VideoProcessingError
+    from app.main import app
+
+    def _raise(raw: bytes):
+        raise VideoProcessingError("ffmpeg boom")
+
+    monkeypatch.setattr("app.api.preprocess.extract_audio", _raise)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/preprocess/video",
+        files={"file": ("t.mp4", b"x", "video/mp4")},
+    )
+    assert response.status_code == 500
+
+
 def test_preprocess_audio_endpoint_returns_500_on_error(
     fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
