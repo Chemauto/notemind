@@ -142,18 +142,19 @@ def _fake_extract_audio(raw: bytes):
     return result
 
 
-def _fake_transcribe_default(raw: bytes, mime_type: str, language=None, model_name="small"):
-    result = MagicMock()
-    result.text = "视频转写文本"
-    result.metadata = {"language": "zh", "duration": 30.0, "model": "small"}
-    return result
-
-
 def test_preprocess_video_endpoint_returns_text(fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch) -> None:
     from app.main import app
 
+    mock_transcribe = MagicMock()
+    mock_transcribe.return_value.text = "视频转写文本"
+    mock_transcribe.return_value.metadata = {
+        "language": "zh",
+        "duration": 30.0,
+        "model": "small",
+    }
+
     monkeypatch.setattr("app.api.preprocess.extract_audio", _fake_extract_audio)
-    monkeypatch.setattr("app.api.preprocess.transcribe_audio", _fake_transcribe_default)
+    monkeypatch.setattr("app.api.preprocess.transcribe_audio", mock_transcribe)
 
     client = TestClient(app)
     response = client.post(
@@ -167,6 +168,12 @@ def test_preprocess_video_endpoint_returns_text(fake_env: dict[str, str], monkey
     assert body["metadata"]["language"] == "zh"
     assert body["metadata"]["source_format"] == "video"
     assert body["metadata"]["duration_seconds"] == 30.0
+
+    # Verify the wiring: extract's audio_bytes must feed transcribe's input.
+    mock_transcribe.assert_called_once()
+    call_args = mock_transcribe.call_args
+    assert call_args.args[0] == b"wav-bytes"
+    assert call_args.args[1] == "audio/wav"
 
 
 def test_preprocess_video_endpoint_rejects_missing_file(fake_env: dict[str, str]) -> None:
