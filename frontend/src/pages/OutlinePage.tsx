@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OutlineTree, outline_helpers } from "@/components/OutlineTree";
+import { StyleDepthSelector } from "@/components/StyleDepthSelector";
 import { generate_markdown } from "@/lib/api";
 import { useNoteStore } from "@/stores/noteStore";
 import type { Outline, OutlineNode } from "@/lib/types";
@@ -73,11 +74,14 @@ export function OutlinePage() {
 
   return (
     <div className="min-h-screen max-w-3xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <h1 className="text-2xl font-semibold">大纲预览（可编辑）</h1>
-        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-          {mutation.isPending ? "生成笔记中..." : "生成笔记 →"}
-        </Button>
+        <div className="flex items-center gap-4 flex-wrap">
+          <StyleDepthSelector size="sm" />
+          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            {mutation.isPending ? "生成笔记中..." : "生成笔记 →"}
+          </Button>
+        </div>
       </div>
       <div className="space-y-4 mb-6">
         <div className="space-y-2">
