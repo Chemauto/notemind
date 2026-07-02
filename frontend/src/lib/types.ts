@@ -22,6 +22,7 @@ export interface Outline {
 
 export interface OutlineRequest {
   text: string;
+  images?: string[];
 }
 
 export interface GenerateMarkdownRequest {

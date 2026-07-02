@@ -1,3 +1,4 @@
+import { ImageDropzone, type StoredImage } from "@/components/ImageDropzone";
 import { Textarea } from "@/components/ui/textarea";
 import { DEPTH_OPTIONS, STYLE_OPTIONS } from "@/lib/types";
 import {
@@ -11,23 +12,39 @@ import { Label } from "@/components/ui/label";
 
 interface InputPanelProps {
   text: string;
+  images: StoredImage[];
   style: string;
   depth: string;
   onTextChange: (text: string) => void;
+  onAddImages: (newImages: StoredImage[]) => void;
+  onRemoveImage: (id: string) => void;
   onStyleChange: (style: "academic" | "exam" | "casual" | "meeting") => void;
   onDepthChange: (depth: "minimal" | "standard" | "detailed") => void;
 }
 
 export function InputPanel({
-  text, style, depth, onTextChange, onStyleChange, onDepthChange,
+  text,
+  images,
+  style,
+  depth,
+  onTextChange,
+  onAddImages,
+  onRemoveImage,
+  onStyleChange,
+  onDepthChange,
 }: InputPanelProps) {
   return (
     <div className="w-full max-w-2xl space-y-4">
       <Textarea
-        placeholder="把要做成笔记的文字贴在这里..."
+        placeholder="把要做成笔记的文字贴到这里（或仅用图片）..."
         className="min-h-[200px]"
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
+      />
+      <ImageDropzone
+        images={images}
+        onAdd={onAddImages}
+        onRemove={onRemoveImage}
       />
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
