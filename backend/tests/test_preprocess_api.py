@@ -102,3 +102,53 @@ def test_preprocess_web_endpoint_returns_500_on_error(
         json={"url": "https://example.com"},
     )
     assert response.status_code == 500
+
+
+def test_preprocess_audio_endpoint_returns_text(fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.main import app
+
+    def _fake_transcribe(raw: bytes, mime_type: str, language=None, model_name="small"):
+        result = MagicMock()
+        result.text = "音频转写文本"
+        result.metadata = {"language": "zh", "duration": 30.0, "model": "small"}
+        return result
+
+    monkeypatch.setattr("app.api.preprocess.transcribe_audio", _fake_transcribe)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/preprocess/audio",
+        files={"file": ("test.mp3", b"fake-audio-bytes", "audio/mpeg")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["text"] == "音频转写文本"
+    assert body["source_type"] == "audio"
+    assert body["metadata"]["language"] == "zh"
+
+
+def test_preprocess_audio_endpoint_rejects_missing_file(fake_env: dict[str, str]) -> None:
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.post("/api/preprocess/audio", files={})
+    assert response.status_code == 422
+
+
+def test_preprocess_audio_endpoint_returns_500_on_error(
+    fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.api.preprocess import AudioProcessingError
+    from app.main import app
+
+    def _raise(raw: bytes, mime_type: str, language=None, model_name="small"):
+        raise AudioProcessingError("transcribe failed")
+
+    monkeypatch.setattr("app.api.preprocess.transcribe_audio", _raise)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/preprocess/audio",
+        files={"file": ("t.wav", b"x", "audio/wav")},
+    )
+    assert response.status_code == 500
