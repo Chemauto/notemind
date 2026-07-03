@@ -1,16 +1,30 @@
-# NoteMind
+# 🧠 NoteMind
 
-把任意素材（文字、图片、视频、PDF、网页、音频）变成结构化笔记 + 思维导图。
+> 把任意素材（文字 / 图片 / PDF / 网页 / 音频 / 视频）变成结构化笔记 + 思维导图。
 
-> **当前版本：Plan 4c (视频输入)**，支持文字 + 图片 + PDF + 网页 + 音频 + 视频 → 大纲 → 双视图笔记。
-> 视频通过 ffmpeg 提取音轨，复用 faster-whisper ASR。
+基于智谱 **GLM-4.5V** 多模态大模型，本地部署、数据不出本机。
 
-## 快速开始
+---
+
+## ✨ 功能
+
+- 📝 **多模态输入** — 文字、图片（≤20 张）、PDF、网页 URL、音频、视频
+- 🎬 **视频转写** — ffmpeg 抽音轨 + faster-whisper ASR（支持 mp4/webm/mov，≤100MB）
+- 📑 **可编辑大纲** — LLM 生成结构化 JSON，可增删改节点
+- 🎨 **4 风格 × 3 详细度** — academic / exam / casual / meeting × minimal / standard / detailed
+- 🔄 **重新生成** — 切换风格/详细度后一键重写 Markdown（带确认）
+- 📊 **双视图笔记** — 左 Markdown 编辑器，右思维导图（markmap），双向联动
+- 💾 **本地持久化** — IndexedDB 存多条笔记，刷新不丢
+- 📤 **多格式导出** — Markdown (.md) · 思维导图 (.png) · 完整状态 (.json)
+
+---
+
+## 🚀 快速开始
 
 ### 一键 Docker（推荐）
 
 ```bash
-# 1. 配置后端环境变量
+# 1. 配置 API Key
 cp backend/.env.example backend/.env
 # 编辑 backend/.env，填入 ZHIPU_API_KEY
 
@@ -22,18 +36,18 @@ docker compose up --build
 
 ### 本地开发
 
-后端：
+**后端**（FastAPI + 智谱 GLM-4.5V）：
 
 ```bash
 cd backend
 python -m venv .venv
-. .venv/Scripts/activate     # Windows bash
+. .venv/Scripts/activate        # Windows (bash)
 pip install -e ".[dev]"
-cp .env.example .env         # 填入 ZHIPU_API_KEY
+cp .env.example .env            # 填入 ZHIPU_API_KEY
 uvicorn app.main:app --reload
 ```
 
-前端：
+**前端**（React + Vite）：
 
 ```bash
 cd frontend
@@ -43,38 +57,86 @@ npm run dev
 
 打开 http://localhost:5173
 
-## 测试
+> 💡 `ZHIPU_API_KEY` 在 [智谱开放平台](https://open.bigmodel.cn/) 注册获取。
 
-```bash
-cd backend
-. .venv/Scripts/activate
-pytest -v
+---
+
+## 🏗️ 技术栈
+
+| 层 | 技术 |
+|---|---|
+| LLM | 智谱 [GLM-4.5V](https://open.bigmodel.cn/) 多模态 |
+| 后端 | [FastAPI](https://fastapi.tiangolo.com/) · pydantic v2 · httpx |
+| 文档解析 | [pdfplumber](https://github.com/jsvine/pdfplumber) · [trafilatura](https://github.com/adbar/trafilatura) |
+| ASR | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (CTranslate2) |
+| 音轨提取 | [imageio-ffmpeg](https://github.com/imageio/imageio-ffmpeg) |
+| 前端 | [React 19](https://react.dev/) · [Vite](https://vitejs.dev/) · TypeScript |
+| UI | [shadcn/ui](https://ui.shadcn.com/) · [Tailwind CSS](https://tailwindcss.com/) · [Radix UI](https://www.radix-ui.com/) |
+| 状态 | [Zustand](https://github.com/pmndrs/zustand) · [TanStack Query](https://tanstack.com/query) |
+| 思维导图 | [markmap](https://github.com/markmap/markmap) |
+| 存储 | [idb-keyval](https://github.com/nicedoc/idb-keyval) (IndexedDB) |
+
+---
+
+## 📦 项目结构
+
+```
+notemind/
+├── backend/
+│   ├── app/
+│   │   ├── api/            # FastAPI 路由（preprocess, generate）
+│   │   ├── services/       # 业务层（audio, video, pdf, web）
+│   │   ├── core/           # 配置、LLM 客户端
+│   │   └── schemas/        # pydantic 模型
+│   └── tests/              # 76 个测试
+├── frontend/
+│   └── src/
+│       ├── components/     # 上传组件、UI 控件
+│       ├── pages/          # 输入页、大纲页、笔记页、列表页
+│       ├── stores/         # Zustand store
+│       └── lib/            # api.ts, types.ts, notes_db.ts
+└── docker-compose.yml
 ```
 
-## 功能
+---
 
-- 文字 + 图片 + PDF + 网页 + 音频 → GLM-4.5V 生成结构化大纲 JSON
-  - 图片：1-20 张 PNG/JPEG/WebP，多模态直接理解
-  - PDF：pdfplumber 提取文字（≤50MB）
-  - 网页：trafilatura 抓取正文（输入 URL）
-  - 音频：faster-whisper small 模型转写（≤25MB，mp3/wav/m4a/webm/flac）
-    - 首次使用会下载 ~488MB 模型，之后缓存复用
-- 视频输入：上传 mp4/webm/mov（≤100MB），自动抽音轨 + 转写
-- 大纲可编辑（增删改节点）
-- 4 种风格 × 3 档详细度可调
-- 双视图笔记：左 Markdown 编辑器，右思维导图（markmap）
-  - 编辑 Markdown → 思维导图自动重渲染（300ms 防抖）
-  - 点击思维导图节点 → Markdown 滚动到对应标题
-- 风格/详细度切换：大纲预览和笔记页都能改 style/depth；笔记页加「重新生成」按钮（带确认）
-- 本地持久化：笔记页「保存」按钮写入 IndexedDB；「我的笔记」页（/notes）可列表/打开/删除
-- 导出：Markdown (.md) · 思维导图 (.png) · 完整状态 (.json)
+## 🧪 测试
 
-## 项目结构
+```bash
+# 后端
+cd backend && . .venv/Scripts/activate && pytest -v     # 76 passed
 
-详见 `../docs/superpowers/specs/2026-06-29-notemind-design.md`
+# 前端
+cd frontend && npm test -- --run                         # 30 passed
+```
 
-## 技术栈
+---
 
-- 后端：FastAPI + zhipuai + pydantic
-- 前端：React + Vite + TypeScript + Tailwind + shadcn/ui
-- LLM：智谱 GLM-4.5V
+## 📸 使用流程
+
+1. **输入** → 选择任意输入方式（文字 / 图片 / PDF / 网页 / 音频 / 视频）
+2. **预处理** → 后端把素材转成纯文本（ASR / PDF 解析 / 网页抓取）
+3. **生成大纲** → GLM-4.5V 输出结构化 JSON，可编辑
+4. **生成笔记** → 大纲按所选风格展开为 Markdown
+5. **双视图查看 + 编辑** → 思维导图与 Markdown 同步
+6. **保存 / 导出** → IndexedDB 持久化，或导出 .md / .png / .json
+
+---
+
+## 🙏 致谢
+
+本项目站在以下开源项目的肩膀上：
+
+- **[GLM-4.5V](https://github.com/zhipuai)** — 智谱开源的多模态大模型
+- **[faster-whisper](https://github.com/SYSTRAN/faster-whisper)** — 高速 Whisper ASR
+- **[markmap](https://github.com/markmap/markmap)** — Markdown → 思维导图
+- **[shadcn/ui](https://ui.shadcn.com/)** — 优雅的 React UI 组件
+- **[FastAPI](https://fastapi.tiangolo.com/)** — 现代化 Python Web 框架
+
+完整依赖列表见 [`backend/pyproject.toml`](backend/pyproject.toml) 与 [`frontend/package.json`](frontend/package.json)。
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 ustbxcj
