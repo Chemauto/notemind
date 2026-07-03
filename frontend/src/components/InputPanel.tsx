@@ -2,6 +2,7 @@ import { ImageDropzone, type StoredImage } from "@/components/ImageDropzone";
 import { PdfUpload } from "@/components/PdfUpload";
 import { WebFetch } from "@/components/WebFetch";
 import { AudioUpload } from "@/components/AudioUpload";
+import { VideoUpload } from "@/components/VideoUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { DEPTH_OPTIONS, STYLE_OPTIONS } from "@/lib/types";
 import {
@@ -24,6 +25,7 @@ interface InputPanelProps {
   onPdfExtracted: (text: string, fileName: string) => void;
   onWebExtracted: (text: string, url: string) => void;
   onAudioExtracted: (text: string, fileName: string) => void;
+  onVideoExtracted: (text: string, fileName: string) => void;
   onError: (message: string) => void;
   onStyleChange: (style: "academic" | "exam" | "casual" | "meeting") => void;
   onDepthChange: (depth: "minimal" | "standard" | "detailed") => void;
@@ -40,6 +42,7 @@ export function InputPanel({
   onPdfExtracted,
   onWebExtracted,
   onAudioExtracted,
+  onVideoExtracted,
   onError,
   onStyleChange,
   onDepthChange,
@@ -58,6 +61,8 @@ export function InputPanel({
         <WebFetch onExtracted={onWebExtracted} onError={onError} />
         <span className="text-xs text-zinc-400">或</span>
         <AudioUpload onExtracted={onAudioExtracted} onError={onError} />
+        <span className="text-xs text-zinc-400">或</span>
+        <VideoUpload onExtracted={onVideoExtracted} onError={onError} />
       </div>
       <ImageDropzone
         images={images}

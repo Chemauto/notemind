@@ -56,6 +56,12 @@ export function InputPage() {
     setPreprocessError(null);
   };
 
+  const handle_video = (text: string, fileName: string) => {
+    const prefix = inputText.trim() ? `${inputText.trim()}\n\n` : "";
+    setInputText(`${prefix}# 来源：${fileName}\n\n${text}`);
+    setPreprocessError(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <h1 className="text-4xl font-semibold text-brand-600 mb-2">NoteMind</h1>
@@ -71,6 +77,7 @@ export function InputPage() {
         onPdfExtracted={handle_pdf}
         onWebExtracted={handle_web}
         onAudioExtracted={handle_audio}
+        onVideoExtracted={handle_video}
         onError={setPreprocessError}
         onStyleChange={setStyle}
         onDepthChange={setDepth}
