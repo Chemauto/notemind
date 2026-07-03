@@ -78,28 +78,6 @@ npm run dev
 
 ---
 
-## 📦 项目结构
-
-```
-notemind/
-├── backend/
-│   ├── app/
-│   │   ├── api/            # FastAPI 路由（preprocess, generate）
-│   │   ├── services/       # 业务层（audio, video, pdf, web）
-│   │   ├── core/           # 配置、LLM 客户端
-│   │   └── schemas/        # pydantic 模型
-│   └── tests/              # 76 个测试
-├── frontend/
-│   └── src/
-│       ├── components/     # 上传组件、UI 控件
-│       ├── pages/          # 输入页、大纲页、笔记页、列表页
-│       ├── stores/         # Zustand store
-│       └── lib/            # api.ts, types.ts, notes_db.ts
-└── docker-compose.yml
-```
-
----
-
 ## 🧪 测试
 
 ```bash
@@ -139,4 +117,4 @@ cd frontend && npm test -- --run                         # 30 passed
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 ustbxcj
+[MIT](LICENSE) © 2026 Chemauto
