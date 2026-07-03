@@ -26,3 +26,7 @@ Thumbs.db
 
 # whisper models
 models/
+
+# demo recorder working files
+scripts/node_modules/
+scripts/output/

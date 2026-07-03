@@ -1,0 +1,13 @@
+{
+  "name": "notemind-demo-recorder",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "record": "node record-demo.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "ffmpeg-static": "^5.2.0"
+  }
+}

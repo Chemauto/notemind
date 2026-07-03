@@ -4,6 +4,8 @@
 
 基于智谱 **GLM-4.5V** 多模态大模型，本地部署、数据不出本机。
 
+![demo](frontend/public/demo.gif)
+
 ---
 
 ## ✨ 功能
