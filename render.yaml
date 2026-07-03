@@ -1,0 +1,17 @@
+# Render Blueprint for NoteMind backend
+# 一键部署：点击 README 的 "Deploy to Render" 按钮，或在 https://render.com/deploy 粘贴此仓库 URL。
+# 部署后把 backend URL（如 https://notemind-backend-xyz.onrender.com）记下来，
+# 部署前端时填到 Vercel 的 VITE_BACKEND_URL 环境变量。
+
+services:
+  - type: web
+    name: notemind-backend
+    runtime: python
+    region: singapore   # 国内访问较快；美国用户改 oregon
+    plan: free          # 免费层 512MB RAM、自动休眠；音视频处理可能 OOM，建议升级 starter
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true
+    # 注意：不要在 Render 配 ZHIPU_API_KEY 环境变量。
+    # 用户在前端填自己的 key，通过请求 header 传给后端。

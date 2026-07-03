@@ -40,12 +40,13 @@ def generate_outline(
     text: str = "",
     images: list[str] | None = None,
     llm: LLMClient | None = None,
+    api_key: str | None = None,
 ) -> Outline:
     """从文字 + 图片生成结构化大纲。至少要有 text 或 images 之一。"""
     if not text and not images:
         raise OutlineGenerationError("text 和 images 至少需要一个")
     images = images or []
-    client = llm or LLMClient()
+    client = llm or LLMClient(api_key=api_key)
     user_content = _build_user_content(text, images)
     messages = [
         {"role": "system", "content": OUTLINE_SYSTEM},

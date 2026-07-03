@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    zhipu_api_key: str = Field(..., min_length=1)
+    zhipu_api_key: str = Field(default="")
     zhipu_model: str = "glm-4.5v"
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000

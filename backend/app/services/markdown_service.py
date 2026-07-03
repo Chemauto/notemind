@@ -17,13 +17,14 @@ def generate_markdown(
     style: str = "academic",
     depth: str = "standard",
     llm: LLMClient | None = None,
+    api_key: str | None = None,
 ) -> str:
     if style not in STYLE_RULES:
         raise MarkdownGenerationError(f"未知风格: {style}")
     if depth not in DEPTH_RULES:
         raise MarkdownGenerationError(f"未知详细度: {depth}")
 
-    client = llm or LLMClient()
+    client = llm or LLMClient(api_key=api_key)
     messages = [
         {"role": "system", "content": MARKDOWN_SYSTEM},
         {

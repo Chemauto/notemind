@@ -2,9 +2,54 @@
 
 > 把任意素材（文字 / 图片 / PDF / 网页 / 音频 / 视频）变成结构化笔记 + 思维导图。
 
-基于智谱 **GLM-4.5V** 多模态大模型，本地部署、数据不出本机。
+基于智谱 **GLM-4.5V** 多模态大模型。支持本地部署（数据不出本机），也支持一键云端部署。
 
 ![demo](frontend/public/demo.gif)
+
+---
+
+## 🌐 在线试用 / 一键部署
+
+**方式 A：先部署后端，再部署前端（推荐）**
+
+[![Deploy backend to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Chemauto/notemind)
+
+> Render 免费层 512MB RAM，足够文字 / 图片 / PDF / 网页输入。音频 / 视频会下载 whisper 模型（~488MB），建议升级 starter 层。
+
+[![Deploy frontend to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Chemauto/notemind)
+
+> Vercel 部署时需要在 Environment Variables 里加：
+> - `VITE_BACKEND_URL` = 你的 Render 后端 URL（例如 `https://notemind-backend-xyz.onrender.com`）
+
+部署完成后打开 Vercel 给的域名 → 右上角点 🔑 填入你的智谱 API Key（[点这里注册](https://open.bigmodel.cn/usercenter/apikeys)，新用户送免费额度）→ 开始使用。
+
+**方式 B：本地 Docker**
+
+```bash
+cp backend/.env.example backend/.env       # 填入 ZHIPU_API_KEY
+docker compose up --build
+```
+
+打开 http://localhost:5173
+
+**方式 C：本地源码运行**
+
+```bash
+# 后端
+cd backend
+python -m venv .venv
+. .venv/Scripts/activate        # Windows (bash)
+pip install -e ".[dev]"
+cp .env.example .env            # 填入 ZHIPU_API_KEY
+uvicorn app.main:app --reload
+
+# 前端（另开终端）
+cd frontend
+npm install
+npm run dev
+```
+
+> 💡 智谱 API Key 在 [open.bigmodel.cn](https://open.bigmodel.cn/) 注册获取，新用户送免费额度。
 
 ---
 
@@ -18,48 +63,6 @@
 - 📊 **双视图笔记** — 左 Markdown 编辑器，右思维导图（markmap），双向联动
 - 💾 **本地持久化** — IndexedDB 存多条笔记，刷新不丢
 - 📤 **多格式导出** — Markdown (.md) · 思维导图 (.png) · 完整状态 (.json)
-
----
-
-## 🚀 快速开始
-
-### 一键 Docker（推荐）
-
-```bash
-# 1. 配置 API Key
-cp backend/.env.example backend/.env
-# 编辑 backend/.env，填入 ZHIPU_API_KEY
-
-# 2. 启动
-docker compose up --build
-```
-
-打开 http://localhost:5173 即可使用。
-
-### 本地开发
-
-**后端**（FastAPI + 智谱 GLM-4.5V）：
-
-```bash
-cd backend
-python -m venv .venv
-. .venv/Scripts/activate        # Windows (bash)
-pip install -e ".[dev]"
-cp .env.example .env            # 填入 ZHIPU_API_KEY
-uvicorn app.main:app --reload
-```
-
-**前端**（React + Vite）：
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-打开 http://localhost:5173
-
-> 💡 `ZHIPU_API_KEY` 在 [智谱开放平台](https://open.bigmodel.cn/) 注册获取。
 
 ---
 

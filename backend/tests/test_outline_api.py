@@ -81,9 +81,10 @@ def test_outline_endpoint_accepts_images_field(
     """endpoint 接受 images 字段并把它们压进 generate_outline。"""
     captured: dict = {}
 
-    def _fake_generate(text: str = "", images: list[str] | None = None, llm=None):
+    def _fake_generate(text: str = "", images: list[str] | None = None, llm=None, api_key=None):
         captured["text"] = text
         captured["images"] = images or []
+        captured["api_key"] = api_key
         return _VALID_OUTLINE
 
     monkeypatch.setattr("app.api.outline.generate_outline", _fake_generate)
@@ -109,10 +110,49 @@ def test_outline_endpoint_works_with_images_only(
     """text 缺省时，images 仍能触发生成。"""
     captured: dict = {}
 
-    def _fake_generate(text: str = "", images: list[str] | None = None, llm=None):
+    def _fake_generate(text: str = "", images: list[str] | None = None, llm=None, api_key=None):
         captured["text"] = text
         captured["images"] = images or []
         return _VALID_OUTLINE
+
+    monkeypatch.setattr("app.api.outline.generate_outline", _fake_generate)
+
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/outline",
+        json={"images": ["data:image/jpeg;base64,BBBB"]},
+    )
+    assert response.status_code == 200
+    assert captured["text"] == ""
+    assert captured["images"] == ["data:image/jpeg;base64,BBBB"]
+
+
+def test_outline_endpoint_forwards_user_api_key(
+    fake_env: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """用户在前端填的 key 通过 X-Zhipu-Api-Key header 传到 service。"""
+    captured: dict = {}
+
+    def _fake_generate(text: str = "", images: list[str] | None = None, llm=None, api_key=None):
+        captured["text"] = text
+        captured["images"] = images or []
+        captured["api_key"] = api_key
+        return _VALID_OUTLINE
+
+    monkeypatch.setattr("app.api.outline.generate_outline", _fake_generate)
+
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/outline",
+        json={"text": "test"},
+        headers={"X-Zhipu-Api-Key": "user-provided-key-xyz"},
+    )
+    assert response.status_code == 200
+    assert captured["api_key"] == "user-provided-key-xyz"
 
     monkeypatch.setattr("app.api.outline.generate_outline", _fake_generate)
 
